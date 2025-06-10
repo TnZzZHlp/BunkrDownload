@@ -73,34 +73,27 @@
             const total = links.length;
             const progressEl = document.getElementById("download-progress");
             progressEl.textContent = `0/${total}`;
-            const videoUrls = [];
             let count = 0;
             for (const link of links) {
                 await new Promise((resolve) => {
                     loadPageInIframe(link.href, (doc) => {
                         const videoSource = doc.querySelector("video source");
                         if (videoSource) {
-                            console.debug(
-                                "找到视频链接：",
-                                videoSource.getAttribute("src")
-                            );
-                            videoUrls.push(videoSource.getAttribute("src"));
+                            const url = videoSource.getAttribute("src");
+                            console.debug("找到视频链接：", url);
+                            // 立即触发下载
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = "";
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
                         }
                         count++;
                         progressEl.textContent = `${count}/${total}`;
                         resolve();
                     });
                 });
-            }
-
-            console.log("视频链接：", videoUrls);
-            for (const url of videoUrls) {
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
             }
         }
         createPanel();
